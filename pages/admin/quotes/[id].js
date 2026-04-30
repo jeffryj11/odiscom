@@ -10,6 +10,7 @@ export default function QuoteDetail() {
 
   const [quote, setQuote] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [notes, setNotes] = useState('')
 
   useEffect(() => {
     if (!id) return
@@ -22,6 +23,7 @@ export default function QuoteDetail() {
         .single()
 
       setQuote(data)
+      setNotes(data?.internal_notes || '')
       setLoading(false)
     }
 
@@ -55,6 +57,30 @@ export default function QuoteDetail() {
           <div className="bg-white p-6 rounded-xl shadow">
             <h2 className="text-xl font-bold mb-4">Project Details</h2>
             <p className="whitespace-pre-wrap">{quote.details}</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-xl font-bold mb-4">Internal Notes</h2>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border p-3 rounded mb-4"
+              rows="5"
+              placeholder="Add internal notes, pricing decisions, follow-ups..."
+            />
+            <button
+              onClick={async () => {
+                await supabase
+                  .from('quotes')
+                  .update({ internal_notes: notes })
+                  .eq('id', quote.id)
+
+                alert('Notes saved')
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded font-semibold"
+            >
+              Save Notes
+            </button>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow">
