@@ -8,7 +8,13 @@ export default function AdminQuotesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // SIMPLE PASSWORD PROTECTION (temporary)
+  const [authorized, setAuthorized] = useState(false)
+  const [password, setPassword] = useState('')
+
   useEffect(() => {
+    if (!authorized) return
+
     async function loadQuotes() {
       const { data, error } = await supabase
         .from('quotes')
@@ -25,7 +31,40 @@ export default function AdminQuotesPage() {
     }
 
     loadQuotes()
-  }, [])
+  }, [authorized])
+
+  if (!authorized) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="bg-white p-8 rounded-xl shadow max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Admin Access</h2>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border p-3 rounded mb-4"
+            />
+            <button
+              onClick={() => {
+                if (password === process.env.NEXT_PUBLIC_ADMIN_PASS) {
+                  setAuthorized(true)
+                } else {
+                  alert('Incorrect password')
+                }
+              }}
+              className="w-full bg-blue-600 text-white py-3 rounded font-semibold"
+            >
+              Enter
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   return (
     <>
