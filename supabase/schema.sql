@@ -12,8 +12,11 @@ create table if not exists quotes (
   phone text,
   details text,
   status text not null default 'pending',
+  internal_notes text,
   created_at timestamp with time zone default now()
 );
+
+alter table quotes add column if not exists internal_notes text;
 
 create index if not exists quotes_created_at_idx on quotes (created_at desc);
 create index if not exists quotes_status_idx on quotes (status);
