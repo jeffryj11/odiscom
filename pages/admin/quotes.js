@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import { supabase } from '../../lib/supabase'
@@ -50,6 +51,7 @@ export default function AdminQuotesPage() {
             <button
               onClick={() => {
                 if (password === process.env.NEXT_PUBLIC_ADMIN_PASS) {
+                  sessionStorage.setItem('odiscom_admin_ok', 'true')
                   setAuthorized(true)
                 } else {
                   alert('Incorrect password')
@@ -105,6 +107,7 @@ export default function AdminQuotesPage() {
                       <th className="text-left px-4 py-3">Phone</th>
                       <th className="text-left px-4 py-3">Status</th>
                       <th className="text-left px-4 py-3">Created</th>
+                      <th className="text-left px-4 py-3">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -122,6 +125,11 @@ export default function AdminQuotesPage() {
                         </td>
                         <td className="px-4 py-4 text-gray-500">
                           {quote.created_at ? new Date(quote.created_at).toLocaleString() : ''}
+                        </td>
+                        <td className="px-4 py-4">
+                          <Link href={`/admin/quotes/${quote.id}`} className="text-blue-600 font-semibold">
+                            View
+                          </Link>
                         </td>
                       </tr>
                     ))}
