@@ -16,6 +16,7 @@ export default function QuoteDetail() {
 
   const [selectedProduct, setSelectedProduct] = useState('')
   const [quantity, setQuantity] = useState(1)
+  const [unitPrice, setUnitPrice] = useState(0)
 
   useEffect(() => {
     if (!id) return
@@ -50,7 +51,8 @@ export default function QuoteDetail() {
         quote_id: id,
         product_slug: product.slug,
         product_name: product.name,
-        quantity
+        quantity,
+        unit_price: unitPrice
       }
     ]).select()
 
@@ -59,6 +61,8 @@ export default function QuoteDetail() {
 
   if (loading) return <p className="p-10">Loading...</p>
   if (!quote) return <p className="p-10">Quote not found</p>
+
+  const total = items.reduce((sum, item) => sum + (item.total_price || 0), 0)
 
   return (
     <>
@@ -85,20 +89,39 @@ export default function QuoteDetail() {
                 ))}
               </select>
 
-              <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="border p-2 rounded w-24" />
+              <input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="border p-2 rounded w-24" />
+
+              <input type="number" placeholder="Unit $" value={unitPrice} onChange={(e) => setUnitPrice(Number(e.target.value))} className="border p-2 rounded w-28" />
 
               <button onClick={addItem} className="bg-blue-600 text-white px-4 py-2 rounded">
                 Add
               </button>
             </div>
 
-            <ul className="space-y-2">
-              {items.map(item => (
-                <li key={item.id} className="border p-3 rounded">
-                  {item.product_name} — Qty: {item.quantity}
-                </li>
-              ))}
-            </ul>
+            <table className="w-full text-sm border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 text-left">Product</th>
+                  <th className="p-2">Qty</th>
+                  <th className="p-2">Unit Price</th>
+                  <th className="p-2">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map(item => (
+                  <tr key={item.id} className="border-t">
+                    <td className="p-2">{item.product_name}</td>
+                    <td className="p-2 text-center">{item.quantity}</td>
+                    <td className="p-2 text-center">${item.unit_price}</td>
+                    <td className="p-2 text-center font-semibold">${item.total_price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="text-right mt-4 font-bold text-lg">
+              Total: ${total}
+            </div>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow">
