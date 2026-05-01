@@ -1,47 +1,6 @@
-import PDFDocument from 'pdfkit'
 import nodemailer from 'nodemailer'
 import { supabase } from '../../../../lib/supabase'
-
-function buildQuotePdfBuffer(quote, items) {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 40 })
-    const chunks = []
-
-    doc.on('data', chunk => chunks.push(chunk))
-    doc.on('end', () => resolve(Buffer.concat(chunks)))
-    doc.on('error', reject)
-
-    let total = 0
-
-    doc.fontSize(22).text('Odiscom Supply', { align: 'center' })
-    doc.moveDown()
-    doc.fontSize(16).text(`Quote ${quote.quote_id}`)
-    doc.moveDown(0.5)
-    doc.fontSize(11).text(`Company: ${quote.company}`)
-    doc.text(`Contact: ${quote.name}`)
-    doc.text(`Email: ${quote.email}`)
-    if (quote.phone) doc.text(`Phone: ${quote.phone}`)
-    doc.moveDown()
-
-    doc.fontSize(12).text('Quote Items', { underline: true })
-    doc.moveDown(0.5)
-
-    items.forEach(item => {
-      const lineTotal = Number(item.total_price || 0)
-      total += lineTotal
-      doc.fontSize(10).text(`${item.product_name}`)
-      doc.text(`Qty: ${item.quantity}    Unit Price: $${item.unit_price || 0}    Total: $${lineTotal.toFixed(2)}`)
-      doc.moveDown(0.5)
-    })
-
-    doc.moveDown()
-    doc.fontSize(14).text(`Quote Total: $${total.toFixed(2)}`, { align: 'right' })
-    doc.moveDown()
-    doc.fontSize(9).text('Quote is subject to final availability, lead time, taxes, freight, and written acceptance. Pricing may change if scope, quantities, or product availability changes.')
-
-    doc.end()
-  })
-}
+import { buildProfessionalQuotePdf } from '../../../../lib/quotePdf'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -74,7 +33,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, message: 'SMTP is not configured' })
   }
 
-  const pdfBuffer = await buildQuotePdfBuffer(quote, items || [])
+  const pdfBuffer = await buildProfessionalQuotePdf(quote, items || [])
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
