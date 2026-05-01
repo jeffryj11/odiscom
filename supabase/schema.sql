@@ -25,9 +25,14 @@ create table if not exists quote_items (
   product_name text not null,
   quantity numeric not null default 1,
   unit text,
+  unit_price numeric not null default 0,
+  total_price numeric generated always as (quantity * unit_price) stored,
   notes text,
   created_at timestamp with time zone default now()
 );
+
+alter table quote_items add column if not exists unit_price numeric not null default 0;
+alter table quote_items add column if not exists total_price numeric generated always as (quantity * unit_price) stored;
 
 create index if not exists quotes_created_at_idx on quotes (created_at desc);
 create index if not exists quotes_status_idx on quotes (status);
